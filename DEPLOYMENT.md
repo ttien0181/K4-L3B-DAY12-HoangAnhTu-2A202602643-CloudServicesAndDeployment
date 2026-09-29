@@ -13,12 +13,12 @@
 | Mục | Nội dung |
 | --- | --- |
 | Platform | Render Blueprint (`render.yaml`) |
-| Public URL | Chưa được Render cấp trong phiên làm việc này |
-| Ngày deploy | Chưa deploy |
+| Public URL | https://day12-agent-3ziw.onrender.com |
+| Ngày deploy | 2026-09-29 |
 
-`render.yaml` tạo web service từ Dockerfile và Render Key Value. Các biến được
-khai báo dưới đây là **cấu hình dự kiến**; chưa thể xác nhận chúng đã được set
-trên cloud khi Blueprint chưa chạy. Không lưu giá trị secret trong repository.
+`render.yaml` tạo web service từ Dockerfile và Render Key Value. Blueprint đã
+sync thành công trên Render. `/ready` trả `redis: true`, xác nhận kết nối Redis.
+Không lưu giá trị secret trong repository.
 
 | Biến | Cách cấu hình |
 | --- | --- |
@@ -29,20 +29,18 @@ trên cloud khi Blueprint chưa chạy. Không lưu giá trị secret trong repo
 | `MONTHLY_BUDGET_USD` | `10.0` trong Blueprint |
 | `LOG_LEVEL` | `INFO` trong Blueprint |
 
-## Các bước cần hoàn tất trên Render
+## Trạng thái Render
 
-1. Đẩy thay đổi của repository lên GitHub.
-2. Vào Render → New → Blueprint, chọn repository ở trên và triển khai `render.yaml`.
-3. Nhập `AGENT_API_KEY` trong Render khi được hỏi. Không ghi giá trị vào tài liệu này.
-4. Chờ web service và Key Value hoạt động, ghi public URL thật vào bảng trên.
-5. Chạy các lệnh kiểm tra, dán status và body thật bên dưới, rồi lưu ảnh.
+Blueprint trên nhánh `main` đã tạo `day12-agent` và `day12-redis`. Web service
+đang phục vụ các endpoint công khai tại URL ở trên. Cần lưu ảnh dashboard và
+ảnh kiểm tra `/health` vào `screenshots/` trước khi nộp bài.
 
 ## Kiểm tra public URL
 
-Trong PowerShell, đặt `$URL` thành public URL thật của web service:
+Trong PowerShell:
 
 ```powershell
-$URL = '<public URL do Render cấp>'
+$URL = 'https://day12-agent-3ziw.onrender.com'
 curl.exe -i "$URL/health"
 curl.exe -i "$URL/ready"
 curl.exe -i -X POST "$URL/ask" -H 'Content-Type: application/json' -d '{"question":"Hello"}'
@@ -55,8 +53,13 @@ giá trị key vào terminal output, screenshot hoặc tài liệu công khai.
 
 ### Output thực tế
 
-Chưa có public URL để kiểm tra. Chỉ bổ sung output sau khi các lệnh trên chạy
-thành công với service thật.
+Đã gọi service thật qua HTTPS ngày 2026-09-29:
+
+```text
+GET  /health  200  {"status":"ok","service":"day12-agent","version":"1.0.0"}
+GET  /ready   200  {"status":"ready","redis":true}
+POST /ask     401  {"detail":"invalid or missing API key"}
+```
 
 ## Ảnh chụp
 
